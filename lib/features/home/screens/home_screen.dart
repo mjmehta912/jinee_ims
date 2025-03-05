@@ -9,6 +9,7 @@ import 'package:jinee_ims/styles/font_sizes.dart';
 import 'package:jinee_ims/styles/text_styles.dart';
 import 'package:jinee_ims/utils/screen_utils/app_paddings.dart';
 import 'package:jinee_ims/utils/screen_utils/app_spaces.dart';
+import 'package:jinee_ims/utils/widgets/app_button.dart';
 import 'package:jinee_ims/utils/widgets/app_date_picker_field.dart';
 import 'package:jinee_ims/utils/widgets/app_loading_overlay.dart';
 import 'package:jinee_ims/utils/widgets/app_text_form_field.dart';
@@ -85,20 +86,22 @@ class HomeScreen extends StatelessWidget {
                                             : Colors.grey,
                                     borderRadius: BorderRadius.circular(100),
                                   ),
-                                  child: Text(
-                                    category.count.toString(),
-                                    style:
-                                        _controller.selectedIndex.value == index
-                                            ? TextStyles.kBoldNunito(
-                                                context,
-                                                color: kColorWhite,
-                                                baseSize: FontSizes.k12,
-                                              )
-                                            : TextStyles.kRegularNunito(
-                                                context,
-                                                color: kColorWhite,
-                                                baseSize: FontSizes.k12,
-                                              ),
+                                  child: Obx(
+                                    () => Text(
+                                      category.count.toString(),
+                                      style: _controller.selectedIndex.value ==
+                                              index
+                                          ? TextStyles.kBoldNunito(
+                                              context,
+                                              color: kColorWhite,
+                                              baseSize: FontSizes.k12,
+                                            )
+                                          : TextStyles.kRegularNunito(
+                                              context,
+                                              color: kColorWhite,
+                                              baseSize: FontSizes.k12,
+                                            ),
+                                    ),
                                   ),
                                 ),
                               ],
@@ -121,6 +124,7 @@ class HomeScreen extends StatelessWidget {
                         ),
                         child: Column(
                           children: [
+                            // Filters and Search Row
                             SingleChildScrollView(
                               scrollDirection: Axis.horizontal,
                               child: Row(
@@ -131,6 +135,12 @@ class HomeScreen extends StatelessWidget {
                                         _controller.fromDateController,
                                     hintText: 'From Date',
                                     maxWidth: 250,
+                                    onChanged: (value) async {
+                                      await _controller.getCategories();
+                                      await _controller.getData(
+                                        category: category.category,
+                                      );
+                                    },
                                   ),
                                   AppSpaces.h(context, 10),
                                   AppDatePickerTextFormField(
@@ -138,6 +148,12 @@ class HomeScreen extends StatelessWidget {
                                         _controller.toDateController,
                                     hintText: 'To Date',
                                     maxWidth: 250,
+                                    onChanged: (value) async {
+                                      await _controller.getCategories();
+                                      await _controller.getData(
+                                        category: category.category,
+                                      );
+                                    },
                                   ),
                                   AppSpaces.h(context, 10),
                                   AppTextFormField(
@@ -150,6 +166,12 @@ class HomeScreen extends StatelessWidget {
                                       color: kColorGrey,
                                       size: 20,
                                     ),
+                                    onChanged: (value) async {
+                                      await _controller.getCategories();
+                                      await _controller.getData(
+                                        category: category.category,
+                                      );
+                                    },
                                   ),
                                   AppSpaces.h(context, 10),
                                   GestureDetector(
@@ -200,127 +222,60 @@ class HomeScreen extends StatelessWidget {
                               ),
                             ),
                             AppSpaces.v(context, 10),
+
                             Obx(
                               () {
+                                if (_controller.isLoading.value) {
+                                  const SizedBox.shrink();
+                                }
                                 if (_controller.data.isEmpty &&
                                     !_controller.isLoading.value) {
-                                  return const SizedBox.shrink();
+                                  return Expanded(
+                                    child: Center(
+                                      child: Text(
+                                        'No data found.',
+                                        style: TextStyles.kMediumNunito(
+                                          context,
+                                          baseSize: FontSizes.k14,
+                                        ),
+                                      ),
+                                    ),
+                                  );
                                 }
 
                                 return Expanded(
-                                  child: Column(
-                                    children: [
-                                      Container(
-                                        color: kColorPrimary,
-                                        child: Table(
-                                          defaultVerticalAlignment:
-                                              TableCellVerticalAlignment.middle,
-                                          columnWidths: const {
-                                            0: FixedColumnWidth(180),
-                                            1: FixedColumnWidth(180),
-                                            2: FixedColumnWidth(150),
-                                            3: FixedColumnWidth(120),
-                                            4: FixedColumnWidth(120),
-                                            5: FixedColumnWidth(120),
-                                            6: FixedColumnWidth(120),
-                                            7: FixedColumnWidth(120),
-                                            8: FixedColumnWidth(120),
-                                          },
-                                          children: [
-                                            TableRow(
-                                              decoration: BoxDecoration(
-                                                color: kColorPrimary,
-                                              ),
-                                              children: [
-                                                tableHeaderCell('GST Number'),
-                                                tableHeaderCell('Party'),
-                                                tableHeaderCell('Bill No'),
-                                                tableHeaderCell('Date'),
-                                                tableHeaderCell('Amount'),
-                                                tableHeaderCell('Tax'),
-                                                tableHeaderCell('CGST'),
-                                                tableHeaderCell('SGST'),
-                                                tableHeaderCell('Action'),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      Expanded(
-                                        child: SingleChildScrollView(
-                                          scrollDirection: Axis.horizontal,
-                                          child: SingleChildScrollView(
-                                            scrollDirection: Axis.vertical,
-                                            child: Table(
-                                              defaultVerticalAlignment:
-                                                  TableCellVerticalAlignment
-                                                      .middle,
-                                              columnWidths: const {
-                                                0: FixedColumnWidth(180),
-                                                1: FixedColumnWidth(180),
-                                                2: FixedColumnWidth(150),
-                                                3: FixedColumnWidth(120),
-                                                4: FixedColumnWidth(120),
-                                                5: FixedColumnWidth(120),
-                                                6: FixedColumnWidth(120),
-                                                7: FixedColumnWidth(120),
-                                                8: FixedColumnWidth(120),
-                                              },
-                                              children: _controller.data.map(
-                                                (data) {
-                                                  return TableRow(
-                                                    children: [
-                                                      tableDataCell(
-                                                          data.gstNumber ?? ''),
-                                                      tableDataCell(
-                                                          data.pName ?? ''),
-                                                      tableDataCell(
-                                                          data.billNo ?? ''),
-                                                      tableDataCell(data
-                                                                      .billDate !=
-                                                                  null &&
-                                                              data.billDate!
-                                                                  .isNotEmpty
-                                                          ? DateFormat(
-                                                                  "dd-MM-yyyy")
-                                                              .format(
-                                                              DateTime.parse(data
-                                                                  .billDate!),
-                                                            )
-                                                          : ''),
-                                                      tableDataCell(data
-                                                              .valueOfGoods
-                                                              ?.toString() ??
-                                                          '0.0'),
-                                                      tableDataCell(data
-                                                              .gstNetAmount
-                                                              ?.toString() ??
-                                                          '0.0'),
-                                                      tableDataCell(data
-                                                              .cgstAmount
-                                                              ?.toString() ??
-                                                          '0.0'),
-                                                      tableDataCell(data
-                                                              .sgstAmount
-                                                              ?.toString() ??
-                                                          '0.0'),
-                                                      tableDataCell(data
-                                                              .sgstAmount
-                                                              ?.toString() ??
-                                                          '0.0'),
-                                                    ],
-                                                  );
-                                                },
-                                              ).toList(),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                                  child: category.category == "PORTAL"
+                                      ? _buildPortalTable()
+                                      : _buildDefaultTable(),
                                 );
                               },
-                            )
+                            ),
+
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  AppButton(
+                                    buttonWidth: 200,
+                                    buttonHeight: 40,
+                                    buttonColor: kColorGreen,
+                                    titleSize: FontSizes.k12,
+                                    title: 'Accept All',
+                                    onPressed: () {},
+                                  ),
+                                  AppSpaces.h(context, 10),
+                                  AppButton(
+                                    buttonWidth: 200,
+                                    buttonHeight: 40,
+                                    buttonColor: kColorRed,
+                                    title: 'Reject All',
+                                    titleSize: FontSizes.k12,
+                                    onPressed: () {},
+                                  ),
+                                ],
+                              ),
+                            ),
                           ],
                         ),
                       );
@@ -334,6 +289,204 @@ class HomeScreen extends StatelessWidget {
         Obx(
           () => AppLoadingOverlay(
             isLoading: _controller.isLoading.value,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDefaultTable() {
+    return Column(
+      children: [
+        Container(
+          color: kColorPrimary,
+          child: Table(
+            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+            columnWidths: const {
+              0: FixedColumnWidth(180),
+              1: FixedColumnWidth(180),
+              2: FixedColumnWidth(150),
+              3: FixedColumnWidth(120),
+              4: FixedColumnWidth(120),
+              5: FixedColumnWidth(120),
+              6: FixedColumnWidth(120),
+              7: FixedColumnWidth(120),
+              8: FixedColumnWidth(140),
+            },
+            children: [
+              TableRow(
+                decoration: BoxDecoration(
+                  color: kColorPrimary,
+                ),
+                children: [
+                  tableHeaderCell('GST Number'),
+                  tableHeaderCell('Party'),
+                  tableHeaderCell('Bill No'),
+                  tableHeaderCell('Date'),
+                  tableHeaderCell('Amount'),
+                  tableHeaderCell('Tax'),
+                  tableHeaderCell('CGST'),
+                  tableHeaderCell('SGST'),
+                  tableHeaderCell('Action'),
+                ],
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: NotificationListener<ScrollNotification>(
+            onNotification: (ScrollNotification scrollInfo) {
+              if (scrollInfo.metrics.pixels >=
+                      scrollInfo.metrics.maxScrollExtent * 0.9 &&
+                  _controller.isMoreDataAvailable.value &&
+                  !_controller.isLoading.value) {
+                _controller.getData(
+                  category: _controller
+                      .categories[_controller.selectedIndex.value].category,
+                );
+              }
+              return false;
+            },
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: Table(
+                  defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                  columnWidths: const {
+                    0: FixedColumnWidth(180),
+                    1: FixedColumnWidth(180),
+                    2: FixedColumnWidth(150),
+                    3: FixedColumnWidth(120),
+                    4: FixedColumnWidth(120),
+                    5: FixedColumnWidth(120),
+                    6: FixedColumnWidth(120),
+                    7: FixedColumnWidth(120),
+                    8: FixedColumnWidth(150),
+                  },
+                  children: _controller.data.map((data) {
+                    return TableRow(
+                      children: [
+                        tableDataCell(data.gstNumber ?? ''),
+                        tableDataCell(data.pName ?? ''),
+                        tableDataCell(data.billNo ?? ''),
+                        tableDataCell(
+                            data.billDate != null && data.billDate!.isNotEmpty
+                                ? DateFormat("dd-MM-yyyy")
+                                    .format(DateTime.parse(data.billDate!))
+                                : ''),
+                        tableDataCell(data.valueOfGoods?.toString() ?? '0.0'),
+                        tableDataCell(data.gstNetAmount?.toString() ?? '0.0'),
+                        tableDataCell(data.cgstAmount?.toString() ?? '0.0'),
+                        tableDataCell(data.sgstAmount?.toString() ?? '0.0'),
+                        tableDataActionCell(
+                          () {},
+                          () {},
+                        ),
+                      ],
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPortalTable() {
+    return Column(
+      children: [
+        Container(
+          color: Colors.blueAccent,
+          child: Table(
+            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+            columnWidths: const {
+              0: FixedColumnWidth(180),
+              1: FixedColumnWidth(180),
+              2: FixedColumnWidth(145),
+              3: FixedColumnWidth(145),
+              4: FixedColumnWidth(145),
+              5: FixedColumnWidth(145),
+              6: FixedColumnWidth(145),
+              7: FixedColumnWidth(180),
+            },
+            children: [
+              TableRow(
+                decoration: BoxDecoration(
+                  color: Colors.blueAccent,
+                ),
+                children: [
+                  tableHeaderCell('GST Number'),
+                  tableHeaderCell('Bill No'),
+                  tableHeaderCell('Date'),
+                  tableHeaderCell('Amount'),
+                  tableHeaderCell('Tax'),
+                  tableHeaderCell('CGST'),
+                  tableHeaderCell('SGST'),
+                  tableHeaderCell('Action'),
+                ],
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: NotificationListener<ScrollNotification>(
+            onNotification: (ScrollNotification scrollInfo) {
+              if (scrollInfo.metrics.pixels >=
+                      scrollInfo.metrics.maxScrollExtent * 0.9 &&
+                  _controller.isMoreDataAvailable.value &&
+                  !_controller.isLoading.value) {
+                _controller.getData(
+                  category: _controller
+                      .categories[_controller.selectedIndex.value].category,
+                );
+              }
+              return false;
+            },
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: Table(
+                  defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                  columnWidths: const {
+                    0: FixedColumnWidth(180),
+                    1: FixedColumnWidth(180),
+                    2: FixedColumnWidth(145),
+                    3: FixedColumnWidth(145),
+                    4: FixedColumnWidth(145),
+                    5: FixedColumnWidth(145),
+                    6: FixedColumnWidth(145),
+                    7: FixedColumnWidth(180),
+                  },
+                  children: _controller.data.map(
+                    (data) {
+                      return TableRow(
+                        children: [
+                          tableDataCell(data.gstin ?? ''),
+                          tableDataCell(data.invoiceNo ?? ''),
+                          tableDataCell(data.invoiceDate != null &&
+                                  data.invoiceDate!.isNotEmpty
+                              ? DateFormat("dd-MM-yyyy")
+                                  .format(DateTime.parse(data.invoiceDate!))
+                              : ''),
+                          tableDataCell(data.taxableValue?.toString() ?? '0.0'),
+                          tableDataCell(data.totalValue?.toString() ?? '0.0'),
+                          tableDataCell(data.cgstAmt?.toString() ?? '0.0'),
+                          tableDataCell(data.sgstAmt?.toString() ?? '0.0'),
+                          tableDataActionCell(
+                            () {},
+                            () {},
+                          ),
+                        ],
+                      );
+                    },
+                  ).toList(),
+                ),
+              ),
+            ),
           ),
         ),
       ],
@@ -366,6 +519,39 @@ class HomeScreen extends StatelessWidget {
           baseSize: FontSizes.k10,
           color: kColorTextPrimary,
         ),
+      ),
+    );
+  }
+
+  Widget tableDataActionCell(
+    VoidCallback onAccept,
+    VoidCallback onReject,
+  ) {
+    return Padding(
+      padding: AppPaddings.p(Get.context!, 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          AppButton(
+            buttonWidth: 65,
+            buttonHeight: 25,
+            buttonColor: kColorGreen,
+            title: 'Accept',
+            titleSize: 7.5,
+            onPressed: onAccept,
+          ),
+          const SizedBox(
+            width: 5,
+          ),
+          AppButton(
+            buttonWidth: 65,
+            buttonHeight: 25,
+            buttonColor: kColorRed,
+            title: 'Reject',
+            titleSize: 7.5,
+            onPressed: onReject,
+          ),
+        ],
       ),
     );
   }

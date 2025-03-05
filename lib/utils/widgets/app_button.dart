@@ -55,7 +55,7 @@ class _AppButtonState extends State<AppButton> {
                     ? kColorPrimary.withAlpha((0.8 * 255).toInt())
                     : widget.buttonColor!.withAlpha((0.8 * 255).toInt()),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(100),
                   side: BorderSide(
                     color: widget.borderColor ??
                         (widget.buttonColor ?? kColorPrimary),

@@ -8,6 +8,7 @@ import 'package:jinee_ims/utils/dialogs/app_dialogs.dart';
 
 class HomeController extends GetxController {
   var isLoading = false.obs;
+  var isMoreDataAvailable = true.obs;
   var selectedIndex = 0.obs;
   var categories = <CategoryDm>[].obs;
   var data = <DataDm>[].obs;
@@ -16,12 +17,14 @@ class HomeController extends GetxController {
   var toDateController = TextEditingController();
   var searchController = TextEditingController();
 
+  var currentPage = 1.obs;
+  final int pageSize = 10;
+
   @override
   void onInit() async {
     super.onInit();
 
     DateTime now = DateTime.now();
-
     DateTime startFinancialYear;
     DateTime endFinancialYear;
 
@@ -38,49 +41,86 @@ class HomeController extends GetxController {
     toDateController.text = DateFormat('dd-MM-yyyy').format(endFinancialYear);
 
     await getCategories();
+    if (categories.isNotEmpty) {
+      await getData(
+        category: categories.first.category,
+        reset: true,
+      );
+    }
   }
 
   void changeTab(int index) async {
     selectedIndex.value = index;
+    currentPage.value = 1;
+    isMoreDataAvailable.value = true;
     await getData(
       category: categories[index].category,
+      reset: true,
     );
   }
 
   Future<void> getCategories() async {
     isLoading.value = true;
     try {
-      var fetchedCategories = await HomeRepo.getCategories();
-      categories.assignAll(fetchedCategories);
-      if (categories.isNotEmpty) {
-        await getData(
-          category: categories.first.category,
-        );
-      }
-    } catch (e) {
-      showErrorDialog(
-        'Error',
-        e.toString(),
+      var fetchedCategories = await HomeRepo.getCategories(
+        fromDate: DateFormat('yyyy-MM-dd').format(
+          DateFormat('dd-MM-yyyy').parse(fromDateController.text),
+        ),
+        toDate: DateFormat('yyyy-MM-dd').format(
+          DateFormat('dd-MM-yyyy').parse(toDateController.text),
+        ),
       );
+      categories.assignAll(fetchedCategories);
+    } catch (e) {
+      showErrorDialog('Error', e.toString());
     } finally {
       isLoading.value = false;
     }
   }
 
-  Future<void> getData({required String category}) async {
-    isLoading.value = true;
+  var isFetchingData = false;
+
+  Future<void> getData({
+    required String category,
+    bool reset = false,
+  }) async {
+    if (isLoading.value || !isMoreDataAvailable.value) return;
+
+    if (reset) {
+      currentPage.value = 1;
+      data.clear();
+      isMoreDataAvailable.value = true;
+    }
+
+    if (isFetchingData) return;
+
     try {
+      isLoading.value = true;
+      isFetchingData = true;
       var fetchedData = await HomeRepo.getData(
         category: category,
+        fromDate: DateFormat('yyyy-MM-dd').format(
+          DateFormat('dd-MM-yyyy').parse(fromDateController.text),
+        ),
+        toDate: DateFormat('yyyy-MM-dd').format(
+          DateFormat('dd-MM-yyyy').parse(toDateController.text),
+        ),
+        searchText: searchController.text,
+        pageNumber: currentPage.value,
+        pageSize: pageSize,
       );
-      data.assignAll(fetchedData);
+
+      if (fetchedData.isNotEmpty) {
+        data.addAll(fetchedData);
+        currentPage.value++;
+      } else {
+        isMoreDataAvailable.value = false;
+      }
     } catch (e) {
-      showErrorDialog(
-        'Error',
-        e.toString(),
-      );
+      showErrorDialog('Error', e.toString());
     } finally {
       isLoading.value = false;
+      isFetchingData = false;
     }
   }
 }
