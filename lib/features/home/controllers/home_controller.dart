@@ -85,14 +85,13 @@ class HomeController extends GetxController {
     bool reset = false,
   }) async {
     if (isLoading.value || !isMoreDataAvailable.value) return;
+    if (isFetchingData) return;
 
     if (reset) {
       currentPage.value = 1;
       data.clear();
       isMoreDataAvailable.value = true;
     }
-
-    if (isFetchingData) return;
 
     try {
       isLoading.value = true;

@@ -246,7 +246,9 @@ class HomeScreen extends StatelessWidget {
                                 return Expanded(
                                   child: category.category == "PORTAL"
                                       ? _buildPortalTable()
-                                      : _buildDefaultTable(),
+                                      : category.category == 'AMOUNT_MISMATCH'
+                                          ? _buildAmountMismatchTable()
+                                          : _buildDefaultTable(),
                                 );
                               },
                             ),
@@ -395,6 +397,107 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildAmountMismatchTable() {
+    return Column(
+      children: [
+        Container(
+          color: kColorPrimary,
+          child: Table(
+            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+            columnWidths: const {
+              0: FixedColumnWidth(180),
+              1: FixedColumnWidth(180),
+              2: FixedColumnWidth(150),
+              3: FixedColumnWidth(120),
+              4: FixedColumnWidth(120),
+              5: FixedColumnWidth(120),
+              6: FixedColumnWidth(120),
+              7: FixedColumnWidth(120),
+              8: FixedColumnWidth(140),
+            },
+            children: [
+              TableRow(
+                decoration: BoxDecoration(
+                  color: kColorPrimary,
+                ),
+                children: [
+                  tableHeaderCell('GST Number'),
+                  tableHeaderCell('Party'),
+                  tableHeaderCell('Bill No'),
+                  tableHeaderCell('Date'),
+                  tableHeaderCell('Amount'),
+                  tableHeaderCell('Tax'),
+                  tableHeaderCell('CGST'),
+                  tableHeaderCell('SGST'),
+                  tableHeaderCell('Action'),
+                ],
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: NotificationListener<ScrollNotification>(
+            onNotification: (ScrollNotification scrollInfo) {
+              if (scrollInfo.metrics.pixels >=
+                      scrollInfo.metrics.maxScrollExtent * 0.9 &&
+                  _controller.isMoreDataAvailable.value &&
+                  !_controller.isLoading.value) {
+                _controller.getData(
+                  category: _controller
+                      .categories[_controller.selectedIndex.value].category,
+                );
+              }
+              return false;
+            },
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: Table(
+                  defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                  columnWidths: const {
+                    0: FixedColumnWidth(180),
+                    1: FixedColumnWidth(180),
+                    2: FixedColumnWidth(150),
+                    3: FixedColumnWidth(120),
+                    4: FixedColumnWidth(120),
+                    5: FixedColumnWidth(120),
+                    6: FixedColumnWidth(120),
+                    7: FixedColumnWidth(120),
+                    8: FixedColumnWidth(150),
+                  },
+                  children: _controller.data.map((data) {
+                    return TableRow(
+                      children: [
+                        tableDataCell(data.gstNumber ?? ''),
+                        tableDataCell(data.pName ?? ''),
+                        tableDataCell(data.billNo ?? ''),
+                        tableDataCell(
+                            data.billDate != null && data.billDate!.isNotEmpty
+                                ? DateFormat("dd-MM-yyyy")
+                                    .format(DateTime.parse(data.billDate!))
+                                : ''),
+                        tableDataCell(data.valueOfGoods?.toString() ?? '0.0'),
+                        tableDataCell(data.gstNetAmount?.toString() ?? '0.0',
+                            subValue: data.totalValue?.toString() ?? '0.0'),
+                        tableDataCell(data.cgstAmount?.toString() ?? '0.0'),
+                        tableDataCell(data.sgstAmount?.toString() ?? '0.0'),
+                        tableDataActionCell(
+                          () {},
+                          () {},
+                        ),
+                      ],
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildPortalTable() {
     return Column(
       children: [
@@ -499,7 +602,7 @@ class HomeScreen extends StatelessWidget {
       child: Text(
         title,
         textAlign: TextAlign.center,
-        style: TextStyles.kMediumNunito(
+        style: TextStyles.kSemiBoldNunito(
           Get.context!,
           baseSize: FontSizes.k12,
           color: kColorWhite,
@@ -508,17 +611,35 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget tableDataCell(String value) {
+  Widget tableDataCell(
+    String value, {
+    String subValue = '',
+  }) {
     return Padding(
       padding: AppPaddings.p(Get.context!, 4),
-      child: Text(
-        value,
-        textAlign: TextAlign.center,
-        style: TextStyles.kMediumNunito(
-          Get.context!,
-          baseSize: FontSizes.k10,
-          color: kColorTextPrimary,
-        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            value,
+            textAlign: TextAlign.center,
+            style: TextStyles.kSemiBoldNunito(
+              Get.context!,
+              baseSize: FontSizes.k10,
+              color: kColorTextPrimary,
+            ),
+          ),
+          if (subValue.isNotEmpty)
+            Text(
+              subValue,
+              textAlign: TextAlign.center,
+              style: TextStyles.kRegularNunito(
+                Get.context!,
+                baseSize: FontSizes.k10,
+                color: kColorSecondary,
+              ),
+            ),
+        ],
       ),
     );
   }
