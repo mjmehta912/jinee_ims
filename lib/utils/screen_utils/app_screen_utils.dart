@@ -17,9 +17,9 @@ class AppScreenUtils {
 
     if (isWebOrDesktop()) {
       if (screenWidth > 1200) {
-        return baseValue * 1.3;
-      } else if (screenWidth > 800 && screenWidth <= 1200) {
         return baseValue * 1.2;
+      } else if (screenWidth > 800 && screenWidth <= 1200) {
+        return baseValue * 1.1;
       }
     }
     return baseValue;

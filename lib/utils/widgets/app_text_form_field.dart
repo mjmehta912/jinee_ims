@@ -17,6 +17,7 @@ class AppTextFormField extends StatelessWidget {
     this.keyboardType,
     this.fillColor,
     this.suffixIcon,
+    this.prefixIcon,
     this.isObscure = false,
     this.inputFormatters,
     this.onFieldSubmitted,
@@ -35,6 +36,7 @@ class AppTextFormField extends StatelessWidget {
   final TextInputType? keyboardType;
   final Color? fillColor;
   final Widget? suffixIcon;
+  final Widget? prefixIcon;
   final bool? isObscure;
   final List<TextInputFormatter>? inputFormatters;
   final void Function(String)? onFieldSubmitted;
@@ -62,7 +64,7 @@ class AppTextFormField extends StatelessWidget {
           keyboardType: keyboardType ?? TextInputType.text,
           style: TextStyles.kMediumNunito(
             context,
-            baseSize: fontSize ?? FontSizes.k16,
+            baseSize: fontSize ?? FontSizes.k12,
             color: kColorTextPrimary,
           ).copyWith(
             fontWeight: fontWeight ?? FontWeight.w400,
@@ -73,38 +75,38 @@ class AppTextFormField extends StatelessWidget {
             hintText: hintText,
             hintStyle: TextStyles.kLightNunito(
               context,
-              baseSize: FontSizes.k14,
+              baseSize: FontSizes.k10,
               color: kColorGrey,
             ),
             errorStyle: TextStyles.kRegularNunito(
               context,
-              baseSize: FontSizes.k14,
+              baseSize: FontSizes.k10,
               color: kColorRed,
             ),
             border: outlineInputBorder(
-              borderColor: kColorGrey,
-              borderWidth: 1.5,
+              borderColor: kColorLightGrey,
+              borderWidth: 1,
             ),
             focusedBorder: outlineInputBorder(
               borderColor: kColorPrimary,
-              borderWidth: 2,
+              borderWidth: 1.5,
             ),
             enabledBorder: outlineInputBorder(
-              borderColor: kColorGrey,
-              borderWidth: 1.5,
+              borderColor: kColorLightGrey,
+              borderWidth: 1,
             ),
             errorBorder: outlineInputBorder(
               borderColor: kColorRed,
-              borderWidth: 1.5,
+              borderWidth: 1,
             ),
-            contentPadding: EdgeInsets.symmetric(
+            contentPadding: const EdgeInsets.symmetric(
               horizontal: 20,
-              vertical: 12,
+              vertical: 10,
             ),
             filled: true,
             fillColor: fillColor ?? kColorBackground,
             suffixIcon: suffixIcon,
-            suffixIconColor: kColorTextPrimary,
+            prefixIcon: prefixIcon,
           ),
         ),
       ),
@@ -116,7 +118,7 @@ class AppTextFormField extends StatelessWidget {
     required double borderWidth,
   }) {
     return OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(100),
       borderSide: BorderSide(
         color: borderColor,
         width: borderWidth,

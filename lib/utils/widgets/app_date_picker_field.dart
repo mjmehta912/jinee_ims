@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:jinee_ims/constants/color_constants.dart';
+import 'package:jinee_ims/constants/image_constants.dart';
 import 'package:jinee_ims/styles/font_sizes.dart';
 import 'package:jinee_ims/styles/text_styles.dart';
 
@@ -56,11 +58,31 @@ class _AppDatePickerTextFormFieldState
               surface: kColorBackground,
             ),
             textTheme: TextTheme(
-              headlineLarge: _fixedTextStyle(),
-              bodyLarge: _fixedTextStyle(),
-              titleLarge: _fixedTextStyle(),
-              displayLarge: _fixedTextStyle(),
-              labelLarge: _fixedTextStyle(),
+              headlineLarge: TextStyles.kBoldNunito(
+                context,
+                baseSize: FontSizes.k16,
+                color: kColorTextPrimary,
+              ),
+              bodyLarge: TextStyles.kRegularNunito(
+                context,
+                baseSize: FontSizes.k12,
+                color: kColorTextPrimary,
+              ),
+              titleLarge: TextStyles.kMediumNunito(
+                context,
+                baseSize: FontSizes.k14,
+                color: kColorTextPrimary,
+              ),
+              displayLarge: TextStyles.kRegularNunito(
+                context,
+                baseSize: FontSizes.k12,
+                color: kColorTextPrimary,
+              ),
+              labelLarge: TextStyles.kRegularNunito(
+                context,
+                baseSize: FontSizes.k12,
+                color: kColorTextPrimary,
+              ),
             ),
             dialogBackgroundColor: kColorWhite,
           ),
@@ -88,14 +110,6 @@ class _AppDatePickerTextFormFieldState
     }
   }
 
-  TextStyle _fixedTextStyle() {
-    return TextStyles.kRegularNunito(
-      context,
-      baseSize: FontSizes.k16, // Fixed font size
-      color: kColorBlack,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -111,7 +125,7 @@ class _AppDatePickerTextFormFieldState
           validator: widget.validator,
           style: TextStyles.kMediumNunito(
             context,
-            baseSize: widget.fontSize ?? FontSizes.k16, // Fixed font size
+            baseSize: widget.fontSize ?? FontSizes.k12, // Fixed font size
             color: kColorTextPrimary,
           ).copyWith(
             fontWeight: widget.fontWeight ?? FontWeight.w400,
@@ -120,45 +134,48 @@ class _AppDatePickerTextFormFieldState
             hintText: widget.hintText,
             hintStyle: TextStyles.kLightNunito(
               context,
-              baseSize: FontSizes.k14, // Fixed font size
+              baseSize: FontSizes.k10, // Fixed font size
               color: kColorGrey,
             ),
             errorStyle: TextStyles.kRegularNunito(
               context,
-              baseSize: FontSizes.k14, // Fixed font size
+              baseSize: FontSizes.k10, // Fixed font size
               color: kColorRed,
             ),
             border: outlineInputBorder(
-              borderColor: kColorGrey,
-              borderWidth: 1.5,
+              borderColor: kColorLightGrey,
+              borderWidth: 1,
             ),
             focusedBorder: outlineInputBorder(
               borderColor: kColorPrimary,
-              borderWidth: 2,
+              borderWidth: 1.5,
             ),
             enabledBorder: outlineInputBorder(
-              borderColor: kColorGrey,
-              borderWidth: 1.5,
+              borderColor: kColorLightGrey,
+              borderWidth: 1,
             ),
             errorBorder: outlineInputBorder(
               borderColor: kColorRed,
-              borderWidth: 1.5,
+              borderWidth: 1,
             ),
             contentPadding: const EdgeInsets.symmetric(
-              horizontal: 20, // Fixed padding
-              vertical: 12, // Fixed padding
+              horizontal: 20,
+              vertical: 10,
             ),
             filled: true,
             fillColor: widget.fillColor ?? kColorBackground,
             suffixIcon: IconButton(
-              icon: const Icon(
-                Icons.calendar_today_rounded,
-                size: 20,
-                color: kColorPrimary,
-              ),
               onPressed: widget.enabled ? () => _selectDate(context) : null,
+              icon: SvgPicture.asset(
+                kIconFilter,
+                height: 20,
+                width: 20,
+                colorFilter: ColorFilter.mode(
+                  kColorGrey,
+                  BlendMode.srcIn,
+                ),
+              ),
             ),
-            suffixIconColor: kColorTextPrimary,
           ),
         ),
       ),
@@ -170,7 +187,7 @@ class _AppDatePickerTextFormFieldState
     required double borderWidth,
   }) {
     return OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(100),
       borderSide: BorderSide(
         color: borderColor,
         width: borderWidth,
